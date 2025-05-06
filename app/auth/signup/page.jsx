@@ -200,7 +200,7 @@ export default function SignupPage() {
                     id="password"
                     name="password"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder=""
                     className={`pl-10 ${
                       errors.password ? "border-destructive" : ""
                     }`}
@@ -221,7 +221,7 @@ export default function SignupPage() {
                     id="confirmPassword"
                     name="confirmPassword"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder=""
                     className={`pl-10 ${
                       errors.confirmPassword ? "border-destructive" : ""
                     }`}

@@ -1,56 +1,89 @@
-"use client"
+"use client";
 
-import { useState, useRef } from "react"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Upload, File } from "lucide-react"
+import { useState, useRef } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Upload, File } from "lucide-react";
 
 export function FileUploader({ onUpload, onCancel }) {
-  const [isDragging, setIsDragging] = useState(false)
-  const [selectedFiles, setSelectedFiles] = useState([])
-  const fileInputRef = useRef(null)
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const fileInputRef = useRef(null);
 
   const handleDragOver = (e) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const handleDrop = (e) => {
-    e.preventDefault()
-    setIsDragging(false)
+    e.preventDefault();
+    setIsDragging(false);
 
     if (e.dataTransfer.files) {
-      const files = Array.from(e.dataTransfer.files)
-      setSelectedFiles(files)
+      const files = Array.from(e.dataTransfer.files);
+      setSelectedFiles(files);
     }
-  }
+  };
 
   const handleFileChange = (e) => {
     if (e.target.files) {
-      const files = Array.from(e.target.files)
-      setSelectedFiles(files)
+      const files = Array.from(e.target.files);
+      setSelectedFiles(files);
     }
-  }
-
-  const handleUpload = () => {
+  };
+  const handleUpload = async () => {
     if (selectedFiles.length > 0) {
-      onUpload(selectedFiles)
-      setSelectedFiles([])
+      // token oldim
+      const token = localStorage.getItem("access");
+
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        console.log(token);
+        try {
+          // fetch sorovi
+          const response = await fetch(
+            "https://carddict.pythonanywhere.com/books/",
+            {
+              method: "POST",
+              body: formData,
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Upload failed");
+          }
+
+          const result = await response.json();
+          onUpload([file]);
+        } catch (error) {
+          console.error("Upload error:", error);
+          alert("Upload failed: " + file.name);
+        }
+      }
+
+      setSelectedFiles([]);
       if (fileInputRef.current) {
-        fileInputRef.current.value = ""
+        fileInputRef.current.value = "";
       }
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
       <div
         className={`border-2 border-dashed rounded-lg p-6 text-center ${
-          isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25"
+          isDragging
+            ? "border-primary bg-primary/5"
+            : "border-muted-foreground/25"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -59,7 +92,9 @@ export function FileUploader({ onUpload, onCancel }) {
         <div className="flex flex-col items-center justify-center space-y-2">
           <Upload className="h-8 w-8 text-muted-foreground" />
           <h3 className="font-medium">Drag and drop your files here</h3>
-          <p className="text-sm text-muted-foreground">or click to browse (PDF, TXT files)</p>
+          <p className="text-sm text-muted-foreground">
+            or click to browse (PDF, TXT files)
+          </p>
           <Input
             ref={fileInputRef}
             type="file"
@@ -68,7 +103,10 @@ export function FileUploader({ onUpload, onCancel }) {
             accept=".pdf,.txt"
             multiple
           />
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+          >
             Browse Files
           </Button>
         </div>
@@ -90,11 +128,12 @@ export function FileUploader({ onUpload, onCancel }) {
               Cancel
             </Button>
             <Button onClick={handleUpload}>
-              Upload {selectedFiles.length} {selectedFiles.length === 1 ? "File" : "Files"}
+              Upload {selectedFiles.length}{" "}
+              {selectedFiles.length === 1 ? "File" : "Files"}
             </Button>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }

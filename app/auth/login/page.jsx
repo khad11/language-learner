@@ -59,7 +59,7 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // 🔐 Tokenlarni localStorage ga saqlaymiz
+        // tokenlar
         localStorage.setItem("access", data.access);
         localStorage.setItem("refresh", data.refresh);
 
